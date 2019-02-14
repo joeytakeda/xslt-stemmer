@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" stylesheet="porterStemmer.xsl" xmlns:jt="http://github.com/joeytakeda">
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">TR</x:param>
+        </x:call>
+        <x:expect label="It should be 0" select="0"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">EE</x:param>
+        </x:call>
+        <x:expect label="It should be 0" select="0"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">TREE</x:param>
+        </x:call>
+        <x:expect label="It should be 0" select="0"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">Y</x:param>
+        </x:call>
+        <x:expect label="It should be 0" select="0"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">BY</x:param>
+        </x:call>
+        <x:expect label="It should be 0" select="0"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">TROUBLE</x:param>
+        </x:call>
+        <x:expect label="It should be 1" select="1"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">OATS</x:param>
+        </x:call>
+        <x:expect label="It should be 1" select="1"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">TREES</x:param>
+        </x:call>
+        <x:expect label="It should be 1" select="1"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">IVY</x:param>
+        </x:call>
+        <x:expect label="It should be 1" select="1"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">TROUBLES</x:param>
+        </x:call>
+        <x:expect label="It should be 2" select="2"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">PRIVATE</x:param>
+        </x:call>
+        <x:expect label="It should be 2" select="2"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">OATEN</x:param>
+        </x:call>
+        <x:expect label="It should be 2" select="2"/>
+    </x:scenario>
+    <x:scenario>
+        <x:label>M Check</x:label>
+        <x:call function="jt:returnM">
+            <x:param name="token">zwagger</x:param>
+        </x:call>
+        <x:expect label="It should be 2" select="2"/>
+    </x:scenario>
+</x:description>
