@@ -36,11 +36,7 @@
                 This code has been inspired primarily by the Javascript implementation, which can be found <xd:a href="https://github.com/kristopolous/Porter-Stemmer">here</xd:a>.
             </xd:p>
             <xd:p>While this XSLT implementation does follow the algorithm described by Porter, it departs from the published version 
-                as per information on his website. As well, it takes a slightly unorthodox approach to determine whether or not the character "Y"
-                functions as a vowel or a consonant. See the function <xd:ref name="jt:translateToCV">jt:translateToCV</xd:ref> for more details. Basically,
-                the function takes an input token and turns all unamibiguous vowels [aeiou] simply into the letter "a" and all unambigious consonants [^aeiou]
-                to the letter "b". It then determines whether or not the "y" character functions as a consonant (if it begins a token or it follows a vowel) and converts
-                it to an "a" or a "b", depending on the context.</xd:p>
+                as per information on his website. As well, it translates all 'y's into consonants ('c') iff they function as such; see the function <xd:ref name="jt:translateY">jt:translateY</xd:ref> for more details.</xd:p>
         </xd:desc>
         
         <xd:param name="debug">A simple switch for debugging information</xd:param>
@@ -63,14 +59,14 @@
        **************************************************************-->
     
     <xd:doc>
-        <xd:desc>The $v variable denotes a vowel and is here reprsented by the vowel 'a'</xd:desc>
+        <xd:desc>The $v variable denotes a of vowels [aeiouy].</xd:desc>
     </xd:doc>
-    <xsl:variable name="v">a</xsl:variable>
+    <xsl:variable name="v">[aeiouy]</xsl:variable>
     
     <xd:doc>
-        <xd:desc>The $c variable denotes a single consonant and is here represented by the consonant 'b'.</xd:desc>
+        <xd:desc>The $c variable denotes a consonant [^aeiou].</xd:desc>
     </xd:doc>
-    <xsl:variable name="c">b</xsl:variable>
+    <xsl:variable name="c">[^aeiouy]</xsl:variable>
     
     <xd:doc>
         <xd:desc>The $C variable denotes a sequence of consonants.</xd:desc>
@@ -485,7 +481,7 @@
     </xd:doc>
     <xsl:function name="jt:mGt0" as="xs:boolean">
         <xsl:param name="token"/>
-        <xsl:value-of select="matches(jt:translateToCV($token),concat('^(',$C,')?',$V,$C))"/>
+        <xsl:value-of select="matches(jt:translateY($token),concat('^(',$C,')?',$V,$C))"/>
     </xsl:function>
     
     <xd:doc>
@@ -494,7 +490,7 @@
     </xd:doc>
     <xsl:function name="jt:mEq1" as="xs:boolean">
         <xsl:param name="token"/>
-        <xsl:value-of select="matches(jt:translateToCV($token),concat('^(',$C,')?',$V,$C,'(',$V,')?$'))"/>
+        <xsl:value-of select="matches(jt:translateY($token),concat('^(',$C,')?',$V,$C,'(',$V,')?$'))"/>
     </xsl:function>
     
     <xd:doc>
@@ -503,7 +499,7 @@
     </xd:doc>
     <xsl:function name="jt:mGt1" as="xs:boolean">
         <xsl:param name="token"/>
-        <xsl:value-of select="matches(jt:translateToCV($token),concat('^(',$C,')?',$V, $C, $V, $C))"/>
+        <xsl:value-of select="matches(jt:translateY($token),concat('^(',$C,')?',$V, $C, $V, $C))"/>
     </xsl:function>
     
     
@@ -520,7 +516,7 @@
     <xsl:function name="jt:endsWithDoubleConsonant" as="xs:boolean">
         <xsl:param name="token"/>
         <xsl:variable name="lastTwo" select="replace($token,'.+(\w{2})$','$1')"/>
-        <xsl:value-of select="matches(jt:translateToCV($lastTwo),concat('^',$c,$c,'$')) and substring($lastTwo,1,1) = substring($lastTwo,2,1)"/>
+        <xsl:value-of select="matches(jt:translateY($lastTwo),concat('^',$c,$c,'$')) and substring($lastTwo,1,1) = substring($lastTwo,2,1)"/>
     </xsl:function>
     
     <xd:doc>
@@ -529,7 +525,7 @@
     </xd:doc>
     <xsl:function name="jt:containsVowel" as="xs:boolean">
         <xsl:param name="token"/>
-        <xsl:value-of select="matches(jt:translateToCV($token),$v)"/>
+        <xsl:value-of select="matches(jt:translateY($token),$v)"/>
     </xsl:function>
     <xd:doc>
         <xd:desc>Determines whether or not a string ends with the sequence "cvc" where c is some consonant and
@@ -538,7 +534,7 @@
     </xd:doc>
     <xsl:function name="jt:endsCVC" as="xs:boolean">
         <xsl:param name="token"/>
-        <xsl:value-of select="matches(jt:translateToCV($token),concat($c,$v,$c,'$')) and not(matches($token,'[wxy]$'))"/>
+        <xsl:value-of select="matches(jt:translateY($token),concat($c,$v,$c,'$')) and not(matches($token,'[wxy]$'))"/>
     </xsl:function>
     
     
@@ -624,21 +620,26 @@
     </xsl:function>
    
    <xd:doc>
-       <xd:desc>This function, as described above, performs four replacements:
-       
-       1) Replace all unambiguous vowels [aeiou] with 'a'
-       2) Replace all unambiguous consonants [^aeiou] with 'b'
-       3) Replace all 'y's that either immediately follow a vowel or begins with the consonant token ('b')
-       4) Replace all 'y' characters with the vowel token.
-       
+       <xd:desc>This function, as described above, replaced the 'y' 
+           with a 'c' character if it functions like a consonant.
+           
        Note that this function should only be called in instances where the result of the outer function is a boolean value;
        in other words, at no point should the results of this function be output.
        </xd:desc>
-       <xd:param name="token">The token to translate into the consonant/vowel system.</xd:param>
+       <xd:param name="token">The token to translate.</xd:param>
    </xd:doc>
-   <xsl:function name="jt:translateToCV" as="xs:string?">
+   <xsl:function name="jt:translateY" as="xs:string?">
        <xsl:param name="token" as="xs:string?"/>
-       <xsl:value-of select="replace(replace(replace(replace($token,'[aeiou]','a'),'[^aeiouy]','b'),'^y|(a)y','$1b'),'y','a')"/>  
+       <xsl:choose>
+           <xsl:when test="matches($token,'y')">
+               <xsl:value-of select="replace($token,'(^y|([aeiou])y)','$2c')"/> 
+           </xsl:when>
+           <xsl:otherwise>
+               <xsl:value-of select="$token"/>
+           </xsl:otherwise>
+       </xsl:choose>
+
+       
    </xsl:function>
    
    

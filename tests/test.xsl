@@ -5,7 +5,7 @@
     xmlns:jt="http://github.com/joeytakeda"
     version="2.0">
     
-    <xsl:include href="porterStemmer.xsl"/>
+    <xsl:include href="../porterStemmer.xsl"/>
     
     <!--This is the test driver for the porter stemmer; the details of which
         are fully described in the file-->
