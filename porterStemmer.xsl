@@ -81,7 +81,8 @@
     <xd:doc>
         <xd:desc>The $seq2 variable lists, as a sequence of strings,
         the match strings and the replacements (in the form match:replace) for 
-        step2.</xd:desc>
+        step2. Porter has revised this sequence since the original publication;
+        the departures are noted below.</xd:desc>
     </xd:doc>
     <xsl:variable name="seq2"
         select="
@@ -632,6 +633,8 @@
        <xsl:param name="token" as="xs:string?"/>
        <xsl:choose>
            <xsl:when test="matches($token,'y')">
+               <!--If the token either begins with a y or it is a y
+                   that immediately precedes a vowel, return a 'c' instead-->
                <xsl:value-of select="replace($token,'(^y|([aeiou])y)','$2c')"/> 
            </xsl:when>
            <xsl:otherwise>
