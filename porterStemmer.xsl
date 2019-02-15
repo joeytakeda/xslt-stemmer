@@ -6,7 +6,7 @@
     xmlns:map="http://www.w3.org/2005/xpath-functions/map"
     version="3.0">
     
-   <xsl:param name="debug" select="'true'"/>
+   <xsl:param name="debug" select="'false'"/>
     
     <xsl:variable name="c">[^aeiou]</xsl:variable>
     <xsl:variable name="v">[aeiou]</xsl:variable>
@@ -30,7 +30,7 @@
     <xsl:variable name="testTokens" select="for $n in tokenize($testDoc,'\n+') return normalize-space($n)"/>
     <xsl:variable name="resultTokens" select="for $n in tokenize($resultDoc,'\n+') return normalize-space($n)"/>
     <xsl:template match="/">
-        <xsl:value-of select="jt:stem('agreement')"/>
+        <xsl:value-of select="jt:stem('crying')"/>
     </xsl:template>
     
     <xsl:template name="test">
@@ -54,14 +54,9 @@
     
    <xsl:function name="jt:stem">
        <xsl:param name="token"/>
-       <xsl:variable name="map" as="map(xs:string,xs:string)">
-           <xsl:map>
-               <xsl:map-entry key="'0'" select="$token"/>
-           </xsl:map>
-       </xsl:variable>
        <xsl:choose>
            <xsl:when test="string-length($token) gt 2">
-               <xsl:value-of select="jt:stem($map, '0')"/>
+               <xsl:value-of select="jt:stem($token, '0')"/>
            </xsl:when>
            <xsl:otherwise>
                <xsl:value-of select="$token"/>
@@ -70,46 +65,41 @@
    </xsl:function>
     
     <xsl:function name="jt:stem" as="xs:string">
-        <xsl:param name="map"/>
+        <xsl:param name="token"/>
         <xsl:param name="step"/>
-        <xsl:variable name="str" select="$map($step)" as="xs:string"/>
         <xsl:if test="$debug='true'">
             <xsl:message>
-                Step <xsl:value-of select="$step"/>: <xsl:value-of select="$str"/>
+                <xsl:value-of select="$step"/>: <xsl:value-of select="$token"/>
             </xsl:message>
         </xsl:if>
-
         <xsl:variable name="nextStep" select="jt:getNextStep($step)" as="xs:string?"/>
         <xsl:choose>
             <xsl:when test="$step = '0'">
-                <xsl:value-of select="jt:stem(map:put($map, $nextStep, jt:step1a($str)), $nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step1a($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '1a'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step1b($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step1b($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '1b'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step1b1($str,$map)),$nextStep)"/>
-            </xsl:when>
-            <xsl:when test="$step = '1b1'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step1c($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step1c($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '1c'">
-                <xsl:value-of select="jt:stem(map:put($map, $nextStep, jt:step2($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step2($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '2'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step3($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step3($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '3'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step4($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step4($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '4'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step5a($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step5a($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step = '5a'">
-                <xsl:value-of select="jt:stem(map:put($map,$nextStep, jt:step5b($str)),$nextStep)"/>
+                <xsl:value-of select="jt:stem(jt:step5b($token),$nextStep)"/>
             </xsl:when>
             <xsl:when test="$step='5b'">
-                <xsl:value-of select="$str"/>
+                <xsl:value-of select="$token"/>
             </xsl:when>
         </xsl:choose>
     </xsl:function>
@@ -140,14 +130,15 @@
     <xsl:function name="jt:step1b">
         <xsl:param name="token"/>
         <xsl:choose>
-            <xsl:when test="matches($token,'eed$') and jt:mGt0(replace($token,'eed$',''))">
-                <xsl:value-of select="replace($token,'eed$','ee')"/>
+            <xsl:when test="matches($token,'eed$')">
+                <xsl:variable name="trim" select="jt:trim($token,'eed')"/>
+                <xsl:value-of select="if (jt:mGt0($trim)) then replace($token,'eed$','ee') else $token"/>
             </xsl:when>
-            <xsl:when test="matches($token,'ed$') and matches(replace($token,'ed$',''),$v)">
-                <xsl:value-of select="replace($token,'ed$','')"/>
+            <xsl:when test="matches($token,'ed$')">
+                <xsl:value-of select="if (jt:containsVowel(jt:trim($token,'ed'))) then jt:step1b1(replace($token,'ed$','')) else $token"/>
             </xsl:when>
-            <xsl:when test="matches($token,'ing$') and matches(replace($token,'ing$',''),$v)">
-                <xsl:value-of select="replace($token,'ing$','')"/>
+            <xsl:when test="matches($token,'ing$')">
+                <xsl:value-of select="if (jt:containsVowel(jt:trim($token,'ing'))) then jt:step1b1(replace($token,'ing$','')) else $token"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="$token"/>
@@ -157,30 +148,21 @@
     
     <xsl:function name="jt:step1b1" as="xs:string">
         <xsl:param name="token"/>
-        <xsl:param name="map"/>
-        <xsl:variable name="oldVal" select="$map('1a')"/>
         <xsl:choose>
-            <xsl:when test="(matches($oldVal,$v) and matches($oldVal,'ed$')) or (matches($oldVal,$v) and matches($oldVal,'ing$'))">
-                <xsl:choose>
-                    <xsl:when test="matches($token,'at$')">
-                        <xsl:value-of select="replace($token,'at$','ate')"/>
-                    </xsl:when>
-                    <xsl:when test="matches($token,'bl$')">
-                        <xsl:value-of select="replace($token,'bl$','ble')"/>
-                    </xsl:when>
-                    <xsl:when test="matches($token,'iz$')">
-                        <xsl:value-of select="replace($token,'iz$','ize')"/>
-                    </xsl:when>
-                    <xsl:when test="jt:endsWithDoubleConsonant($token) and not(matches($token,'[lsz]$'))">
-                        <xsl:value-of select="replace($token,'\w$','')"/>
-                    </xsl:when>
-                    <xsl:when test="jt:mEq1($token) and jt:endsCVC($token)">
-                        <xsl:value-of select="concat($token,'e')"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="$token"/>
-                    </xsl:otherwise>
-                </xsl:choose>
+            <xsl:when test="matches($token,'at$')">
+                <xsl:value-of select="replace($token,'at$','ate')"/>
+            </xsl:when>
+            <xsl:when test="matches($token,'bl$')">
+                <xsl:value-of select="replace($token,'bl$','ble')"/>
+            </xsl:when>
+            <xsl:when test="matches($token,'iz$')">
+                <xsl:value-of select="replace($token,'iz$','ize')"/>
+            </xsl:when>
+            <xsl:when test="jt:endsWithDoubleConsonant($token) and not(matches($token,'[lsz]$'))">
+                <xsl:value-of select="replace($token,'\w$','')"/>
+            </xsl:when>
+            <xsl:when test="jt:mEq1($token) and jt:endsCVC($token)">
+                <xsl:value-of select="concat($token,'e')"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="$token"/>
@@ -191,7 +173,7 @@
    <xsl:function name="jt:step1c" as="xs:string">
        <xsl:param name="token"/>
        <xsl:choose>
-           <xsl:when test="matches($token,$v) and matches($token,'y$')">
+           <xsl:when test="matches($token,'y$') and jt:containsVowel(replace($token,'y$',''))">
                <xsl:value-of select="replace($token,'y$','i')"/>
            </xsl:when>
            <xsl:otherwise>
@@ -202,6 +184,19 @@
     
   <xsl:function name="jt:step2" as="xs:string">
       <xsl:param name="token"/>
+      <!--Note that there are TWO departures from the originally
+          published paper in the following sequence,
+          as per https://tartarus.org/martin/PorterStemmer/:
+          
+          The first is that 
+            "abli:able" 
+          was changed to
+            "bli:ble"
+            
+          The second is that an extra condition was added:
+            "logi:log"
+         -->
+          
       <xsl:variable name="seq"
           select="
           'ational:ate',
@@ -209,7 +204,7 @@
           'enci:ence',
           'anci:ance',
           'izer:ize',
-          'abli:able',
+          'bli:ble',
           'alli:al',
           'entli:ent',
           'eli:e',
@@ -223,7 +218,8 @@
           'ousness:ous',
           'aliti:al',
           'iviti:iv',
-          'biliti:ble'
+          'biliti:ble',
+          'logi:log'
           "
           as="xs:string+"/>
       
@@ -236,6 +232,12 @@
               <xsl:value-of select="$token"/>
           </xsl:otherwise>
       </xsl:choose>
+    </xsl:function>
+    
+    <xsl:function name="jt:trim">
+        <xsl:param name="token"/>
+        <xsl:param name="suffix"/>
+        <xsl:value-of select="replace($token,concat($suffix,'$'),'')"/>
     </xsl:function>
     
       <xsl:function name="jt:step3" as="xs:string">
@@ -338,9 +340,6 @@
                 <xsl:value-of select="'1b'"/>
             </xsl:when>
             <xsl:when test="$step ='1b'">
-                <xsl:value-of select="'1b1'"/>
-            </xsl:when>
-            <xsl:when test="$step='1b1'">
                 <xsl:value-of select="'1c'"/>
             </xsl:when>
             <xsl:when test="$step ='1c'">
@@ -361,12 +360,19 @@
             <xsl:otherwise/>
         </xsl:choose>
     </xsl:function>
+    
     <xsl:function name="jt:endsWithDoubleConsonant" as="xs:boolean">
         <xsl:param name="token"/>
         <xsl:variable name="lastTwo" select="replace($token,'.+(\w{2})$','$1')"/>
         
         <xsl:value-of select="matches($lastTwo,concat('^',$c,$c,'$')) and substring($lastTwo,1,1) = substring($lastTwo,2,1)"/>
     
+    </xsl:function>
+    
+    <xsl:function name="jt:containsVowel" as="xs:boolean">
+        <xsl:param name="token"/>
+        <xsl:variable name="regex" select="if (jt:yIsVowel($token)) then $vy else $v"/>
+        <xsl:value-of select="matches($token,$regex)"/>
     </xsl:function>
     
     <!--the stem ends cvc, where the second c is not W, X or Y (e.g. -WIL,
@@ -376,9 +382,9 @@
         <xsl:value-of select="matches($token,concat($c,$v,$c,'$')) and not(matches($token,'[wxy]$'))"/>
     </xsl:function>
     
-     <xsl:function name="jt:yIsConsonant" as="xs:boolean">
+     <xsl:function name="jt:yIsVowel" as="xs:boolean">
        <xsl:param name="token"/>
-       <xsl:value-of select="matches($token,'[^aeiou]y$')"/>
+       <xsl:value-of select="matches($token,concat($c,'y'))"/>
    </xsl:function>
     
     <xsl:function name="jt:iterate" as="xs:string?">
@@ -417,11 +423,13 @@
                             <xsl:value-of select="replace($token,$regex,$thisReplacement)"/>
                         </xsl:when>
                         <xsl:otherwise>
-                            <xsl:value-of select="jt:iterate($token,$seq, $i+1, $mFx)"/>
+                            <!--Longets match not satisfied, so return the token-->
+                            <xsl:value-of select="$token"/>
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:when>
                 <xsl:otherwise>
+                    <!--Otherwise. move on-->
                     <xsl:value-of select="jt:iterate($token,$seq, $i+1, $mFx)"/>
                 </xsl:otherwise>
             </xsl:choose>
