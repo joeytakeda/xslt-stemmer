@@ -26,7 +26,7 @@
         
     **********************************************************************************************************-->
     
-    <xd:doc>
+    <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Author: Joey Takeda (http://github.com/joeytakeda)</xd:p>
             <xd:p>Created: February 2019</xd:p>
@@ -48,7 +48,10 @@
        *                    Parameters                              *
        *                                                            *
        **************************************************************-->
-    
+    <xd:doc scope="component">
+        <xd:desc>Parameter for switching on and off debugging messages; values should
+        be 'true' or 'false'.</xd:desc>
+    </xd:doc>
     <xsl:param name="debug" select="'false'"/>
     
     
