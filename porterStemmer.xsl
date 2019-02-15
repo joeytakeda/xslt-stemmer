@@ -6,7 +6,7 @@
     xmlns:map="http://www.w3.org/2005/xpath-functions/map"
     version="3.0">
     
-   <xsl:param name="debug" select="'false'"/>
+   <xsl:param name="debug" select="'true'"/>
     
     <xsl:variable name="c">[^aeiou]</xsl:variable>
     <xsl:variable name="v">[aeiou]</xsl:variable>
@@ -30,7 +30,7 @@
     <xsl:variable name="testTokens" select="for $n in tokenize($testDoc,'\n+') return normalize-space($n)"/>
     <xsl:variable name="resultTokens" select="for $n in tokenize($resultDoc,'\n+') return normalize-space($n)"/>
     <xsl:template match="/">
-        <xsl:value-of select="jt:stem('abilities')"/>
+        <xsl:value-of select="jt:stem('agreement')"/>
     </xsl:template>
     
     <xsl:template name="test">
@@ -364,7 +364,8 @@
     <xsl:function name="jt:endsWithDoubleConsonant" as="xs:boolean">
         <xsl:param name="token"/>
         <xsl:variable name="lastTwo" select="replace($token,'.+(\w{2})$','$1')"/>
-        <xsl:value-of select="substring($lastTwo,1,1) = substring($lastTwo,2,1)"/>
+        
+        <xsl:value-of select="matches($lastTwo,concat('^',$c,$c,'$')) and substring($lastTwo,1,1) = substring($lastTwo,2,1)"/>
     
     </xsl:function>
     
