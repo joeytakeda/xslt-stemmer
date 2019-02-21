@@ -184,13 +184,15 @@
     </xd:doc>
    <xsl:function name="jt:stem" as="xs:string">
        <xsl:param name="token" as="xs:string"/>
-
        <xsl:choose>
            <!--If the input token is greater than 2 characters long
+               and DOES NOT contains a number
                then stem-->
-           <xsl:when test="string-length($token) gt 2">
+           <xsl:when test="string-length($token) gt 2 and not(matches($token,'\d'))">
                <xsl:value-of select="jt:stem($token, 0)"/>
            </xsl:when>
+           
+           
            
            <!--If the string is less than 3 characters, then just 
            return the token-->
