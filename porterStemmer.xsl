@@ -40,6 +40,8 @@
         </xd:desc>
         
         <xd:param name="debug">A simple switch for debugging information</xd:param>
+        <xd:param name="beginWithCap">A switch for whether or not the process should stem words
+        that begin with a capital; by default it's false.</xd:param>
     </xd:doc>
     
     
@@ -53,6 +55,12 @@
         be 'true' or 'false'.</xd:desc>
     </xd:doc>
     <xsl:param name="debug" select="'false'"/>
+    
+    <xd:doc scope="component">
+        <xd:desc>Parameter for switching whether or not the process should stem words
+        that begin with a capital (usually that means a proper word). By default, it's false.</xd:desc>
+    </xd:doc>
+    <xsl:param name="beginWithCap" select="'false'"/>
     
     
     <!--**************************************************************
@@ -191,8 +199,9 @@
            <xsl:when test="string-length($token) gt 2 and not(matches($token,'\d'))">
                <xsl:value-of select="jt:stem($token, 0)"/>
            </xsl:when>
-           
-           
+           <xsl:when test="matches($token,'^[A-Z]') and $beginWithCap = 'true'">
+               <xsl:value-of select="jt:stem($token,0)"/>
+           </xsl:when>
            
            <!--If the string is less than 3 characters, then just 
            return the token-->
