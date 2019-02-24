@@ -196,13 +196,12 @@
            <!--If the input token is greater than 2 characters long
                and DOES NOT contains a number
                then stem-->
+           <xsl:when test="matches($token,'^[A-Z]')">
+               <xsl:value-of select="if ($beginWithCap='true') then jt:stem($token) else $token"/>
+           </xsl:when>
            <xsl:when test="string-length($token) gt 2 and not(matches($token,'\d'))">
                <xsl:value-of select="jt:stem($token, 0)"/>
-           </xsl:when>
-           <xsl:when test="matches($token,'^[A-Z]') and $beginWithCap = 'true'">
-               <xsl:value-of select="jt:stem($token,0)"/>
-           </xsl:when>
-           
+           </xsl:when>           
            <!--If the string is less than 3 characters, then just 
            return the token-->
            <xsl:otherwise>
